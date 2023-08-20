@@ -29,16 +29,14 @@
         </div>
         <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
       </div>
-      <div class="shuffler">
+      <div id="shuffler">
         <select id="sel">
             <option value="" id="playlist">-- Select A Playlist to Shuffle--</option>
         </select>
+        <p id="msg"></p>
+            <input type="button" id="shuffle" value="Click to shuffle!">
+        <p id="wait"></p>
       </div>
-      <p id="msg"></p>
-      <div>
-        <input type="button" id="shuffle" value="Click to shuffle!">
-      </div>
-      <p id="wait"></p>
     </div>
 
     <script id="user-profile-template" type="text/x-handlebars-template">
@@ -60,14 +58,14 @@
         </div>
       </div>
     </script>
-
+<!-- 
     <script id="oauth-template" type="text/x-handlebars-template">
       <h2>oAuth info (Ignore this it doesn't matter)</h2>
       <dl class="dl-horizontal">
         <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
         <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
       </dl>
-    </script>
+    </script> -->
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -92,9 +90,9 @@
             userProfileTemplate = Handlebars.compile(userProfileSource),
             userProfilePlaceholder = document.getElementById('user-profile');
 
-        var oauthSource = document.getElementById('oauth-template').innerHTML,
-            oauthTemplate = Handlebars.compile(oauthSource),
-            oauthPlaceholder = document.getElementById('oauth');
+        //var oauthSource = document.getElementById('oauth-template').innerHTML,
+        //    oauthTemplate = Handlebars.compile(oauthSource),
+        //    oauthPlaceholder = document.getElementById('oauth');
 
         var params = getHashParams();
 
@@ -116,10 +114,10 @@
         } else {
           if (access_token) {
             // render oauth info
-            oauthPlaceholder.innerHTML = oauthTemplate({
-              access_token: access_token,
-              refresh_token: refresh_token
-            });
+            //oauthPlaceholder.innerHTML = oauthTemplate({
+            //  access_token: access_token,
+            //  refresh_token: refresh_token
+            //});
 
             $.ajax({
                 url: 'https://api.spotify.com/v1/me',
@@ -130,6 +128,7 @@
                   userProfilePlaceholder.innerHTML = userProfileTemplate(response);
 
                   $('#login').hide();
+                  $('#shuffler').show();
                   $('#loggedin').show();
                 }
             });
@@ -202,22 +201,23 @@
               // render initial screen
               $('#login').show();
               $('#loggedin').hide();
+              $('shuffler').hide()
           }
 
-          document.getElementById('obtain-new-token').addEventListener('click', function() {
-            $.ajax({
-              url: '/refresh_token',
-              data: {
-                'refresh_token': refresh_token
-              }
-            }).done(function(data) {
-              access_token = data.access_token;
-              oauthPlaceholder.innerHTML = oauthTemplate({
-                access_token: access_token,
-                refresh_token: refresh_token
-              });
-            });
-          }, false);
+        //  document.getElementById('obtain-new-token').addEventListener('click', function() {
+        //  $.ajax({
+        //      url: '/refresh_token',
+        //      data: {
+        //        'refresh_token': refresh_token
+        //      }
+        //    }).done(function(data) {
+        //      access_token = data.access_token;
+        //      oauthPlaceholder.innerHTML = oauthTemplate({
+        //        access_token: access_token,
+        //        refresh_token: refresh_token
+        //      });
+        //    });
+        //  }, false);
         }
       })();
     </script>
