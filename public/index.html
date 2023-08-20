@@ -179,9 +179,8 @@
                                 headers: { 'Authorization': 'Bearer ' + access_token, 'Content-Type': 'application/json' },
                                 data: JSON.stringify(dataTwo)
                             });
-
-                            timer.innerHTML = "Your playlist has finished shuffling! Please reload the playlist if you see no changes.";
                         };
+                        timer.innerHTML = "Your playlist has finished shuffling! Please reload the playlist if you see no changes.";
                     }
                 });
             });
