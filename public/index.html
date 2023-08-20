@@ -70,7 +70,7 @@
     </script>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
-    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script>    
       (function() {
 
@@ -101,6 +101,15 @@
         var access_token = params.access_token,
             refresh_token = params.refresh_token,
             error = params.error;
+
+        function putRequest(url, data) {
+            return $.ajax({
+                url: putURL,
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + access_token, 'Content-Type': 'application/json' },
+                data: JSON.stringify(data)
+            });
+        }
 
         if (error) {
           alert('There was an error during the authentication');
@@ -146,44 +155,49 @@
                 }
             });
 
-            document.getElementById('shuffle').addEventListener('click', function() {
+            document.getElementById('shuffle').addEventListener('click', async function() {
                 let playlistID = document.getElementById("sel").value;
                 let putURL = "https://api.spotify.com/v1/playlists/" + playlistID + '/tracks';
                 let playlistURL = "https://api.spotify.com/v1/playlists/" + playlistID;
+              
+                try {
+                    let response = await $.ajax({
+                        url: playlistURL,
+                        headers: {
+                            'Authorization': 'Bearer ' + access_token
+                        },
+                        dataType: 'json'
+                    });
+                  
+                    let timer = document.getElementById("wait");
+                    timer.innerHTML = 'Please wait while your playlist is shuffling...';
+                  
+                    for (let i = response['tracks']['total'] - 1; i > 0; i--) {
+                        let j = Math.floor(Math.random() * (i + 1));
+                        let dataOne = { "range_start": i, "insert_before": j };
+                        let dataTwo = { "range_start": j + 1, "insert_before": i + 1 };
 
-                $.ajax({
-                    url: playlistURL,
-                    headers: {
-                        'Authorization': 'Bearer ' + access_token
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        let timer = document.getElementById("wait");
-                        timer.innerHTML = 'Please wait while your playlist is shuffling...';
-                                        
-                        for (let i = response['tracks']['total'] - 1; i > 0; i --) {
-                            let j = Math.floor(Math.random() * (i + 1));
-                            let dataOne = {"range_start": i, "insert_before": j};
-                            let dataTwo = {"range_start": i + 1, "insert_before": j + 1};
+                        await $.ajax({
+                            url: putURL,
+                            method: 'PUT',
+                            headers: { 'Authorization': 'Bearer ' + access_token },
+                            contentType: 'application/json',
+                            data: JSON.stringify(dataOne)
+                        });
 
-                            $.ajax({
-                                url: putURL,
-                                method: 'PUT',
-                                headers: { 'Authorization': 'Bearer ' + access_token, 'Content-Type': 'application/json' },
-                                data: JSON.stringify(dataOne)
-                            });
-
-                            $.ajax({
-                                url: putURL,
-                                method: 'PUT',
-                                headers: { 'Authorization': 'Bearer ' + access_token, 'Content-Type': 'application/json' },
-                                data: JSON.stringify(dataTwo)
-                            });
-                        };
-                        timer.innerHTML = "Your playlist has finished shuffling! Please reload the playlist if you see no changes.";
+                        await $.ajax({
+                            url: putURL,
+                            method: 'PUT',
+                            headers: { 'Authorization': 'Bearer ' + access_token },
+                            contentType: 'application/json',
+                            data: JSON.stringify(dataTwo)
+                        });
                     }
-                });
-            });
+                    timer.innerHTML = "Your playlist has finished shuffling! Please reload the playlist if you see no changes.";
+                } catch (error) {
+                  alert(error.responseText);
+                }
+              });
           } else {
               // render initial screen
               $('#login').show();
