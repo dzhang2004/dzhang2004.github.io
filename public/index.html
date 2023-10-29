@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Welcome to My Spotify Playlist Shuffler!</title>
+    <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="main.css">
+  </head>
+
+  <body>
+    <div id="header" class="container-fluid">
+        <div id="top">
+            <h1>
+                <img id="spotify-img" src="images/Spotify_Logo_RGB_Green.png" alt="Spotify">
+                <b>Playlist Shuffler</b>
+                <a id="first-login" href="/login" class="btn btn-primary">Login</a>
+            </h1>
+            <p id="author">By: Darian Zhang</p>
+        </div>
+    </div>
+    <div class="container">
+        <div id="intro">
+            <div id="paragraph">
+                <h1><b>Welcome to my personal project: the Spotify Shuffler!</b></h1>
+                <p>Ever found Spotify's shuffle to give you a song one too many times? 
+                    I sure did. So, I took it upon myself to craft a shuffler that injects 
+                    some "more" randomness back into your music sessions.</p>
+                <p>I believe that a good shuffle should surprise and delight, 
+                    not just play the same set of songs in a slightly different
+                    order. Aiming to cause music-genre-whiplash, hopefully you as a fellow
+                    music-lover will be able to experience a new side to the playlists
+                    you listen to contantly.</p>
+            </div>
+        </div>
+        <div>
+            <div id="playlist-img" class="content">
+                <img id="playlist-cover" style="width:200px;height:200px;">
+            </div>
+            <div id="shuffler" class="content">
+                <select id="sel">
+                    <option value="" id="playlist">-- Select A Playlist to Shuffle--</option>
+                </select>
+                <p id="msg"></p>
+                    <input type="button" id="shuffle" value="Click to shuffle!">
+                <p id="wait"></p>
+            </div>
+        </div>
+    </div>
+    <div id="login">
+        <a href="/login" class="btn btn-success">Log in with Spotify To Start!</a>
+    </div>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>    
+      (function() {
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+                q = window.location.hash.substring(1);
+          while (e = r.exec(q)) {
+                hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+        function getPlaylists(httpURL, accessToken) {
+            return new Promise((resolve, reject) => {
+                let playlists = [];
+                $.ajax({
+                    url: httpURL,
+                    headers: {
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response['next'] == null) {
+                            playlists.push(...[].concat(response['items']));
+                            resolve(playlists);
+                        } else {
+                            playlists.push(...[].concat(response['items']));
+                            getPlaylists(response['next'], accessToken).then(morePlaylists => {
+                                playlists.push(...morePlaylists);
+                                resolve(playlists);
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        var params = getHashParams();
+        var access_token = params.access_token,
+            //refresh_token = params.refresh_token,
+            error = params.error;
+
+        var user_id = "darrian1000";
+
+        if (error) {
+            alert('There was an error during the authentication');
+        } else {
+            if (access_token) {
+                $.ajax({
+                    url: 'https://api.spotify.com/v1/me',
+                    headers: {
+                        'Authorization': 'Bearer ' + access_token
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        user_id = response['id'];
+                        document.getElementById('playlist-cover').src =
+                            response['images'][0]['url'];
+                        $('#login').hide(0);
+                        $('#first-login').hide(0);
+                        $('#playlist-img').show(0);
+                        $('#shuffler').show(0);
+                    }
+                });
+                let covers = {};
+                getPlaylists('https://api.spotify.com/v1/me/playlists?limit=50', access_token).then(playlists => {
+                    let ele = document.getElementById('sel');
+                    for (let i = 0; i < playlists.length; i++) {
+                        // Populate playlist dropdown with only user-owned playlists
+                        if (playlists[i]['owner']['id'] == user_id) {
+                            ele.innerHTML = ele.innerHTML +
+                            '<option value="' + playlists[i]['id'] + '">' + 
+                                playlists[i]['name'] + '</option>';
+                            if (playlists[i]['images'].length != 0) {
+                                covers[playlists[i]['id']] = playlists[i]['images'][0]['url'];
+                            } else {
+                                covers[playlists[i]['id']] = 'images/spotify-logo.png'
+                            }
+                        }
+                    }
+                }).catch(error => {
+                    console.error(error);
+                });
+
+                document.getElementById('sel').addEventListener('change', async function() {
+                    let playlistID = document.getElementById('sel').value;
+                    document.getElementById('playlist-cover').src = covers[playlistID];
+                });
+
+                document.getElementById('shuffle').addEventListener('click', async function() {
+                    let playlistID = document.getElementById('sel').value;
+                    let putURL = "https://api.spotify.com/v1/playlists/" + playlistID + '/tracks';
+                    let playlistURL = "https://api.spotify.com/v1/playlists/" + playlistID;
+                    let timer = document.getElementById("wait");
+                    timer.innerHTML = 'Please wait while your playlist is shuffling.';
+                    function timing() {
+                        let text = document.getElementById("wait");
+                        if (text.innerHTML.endsWith("...")) {
+                            text.innerHTML = 'Please wait while your playlist is shuffling.';
+                        } else if (text.innerHTML.endsWith(".")) {
+                            text.innerHTML += ".";
+                        }
+                    }
+                    var isShuffling = setInterval(timing, 1000);
+
+                    try {
+                        let response = await $.ajax({
+                            url: playlistURL,
+                            headers: {
+                                'Authorization': 'Bearer ' + access_token
+                            },
+                            dataType: 'json'
+                        });
+                        for (let i = response['tracks']['total'] - 1; i > 0; i--) {
+                            let j = Math.floor(Math.random() * (i + 1));
+                            if (j == 0) {
+                                j++;
+                            }
+                            let swapOne = { "range_start": i, "insert_before": j };
+                            let swapTwo = { "range_start": j + 1, "insert_before": i + 1 };
+
+                            await $.ajax({
+                                url: putURL,
+                                method: 'PUT',
+                                headers: { 'Authorization': 'Bearer ' + access_token },
+                                contentType: 'application/json',
+                                data: JSON.stringify(swapOne)
+                            });
+
+                            await $.ajax({
+                                url: putURL,
+                                method: 'PUT',
+                                headers: { 'Authorization': 'Bearer ' + access_token },
+                                contentType: 'application/json',
+                                data: JSON.stringify(swapTwo)
+                            });
+                        }
+                        clearInterval(isShuffling);
+                        timer.innerHTML = "Your playlist has finished shuffling!\
+                            Please reload the playlist if you see no changes.";
+                    } catch (error) {
+                        clearInterval(isShuffling);
+                        timer.innerHTML = "Something went wrong getting the \
+                            playlist, please try again in a few seconds."
+                        alert(error.responseText);
+                    }
+                });
+          } else {
+              // render initial screen
+              $('#login').show(0);
+              $('#first-login').show(0);
+              $('#playlist-img').hide(0);
+              $('#shuffler').hide(0);
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

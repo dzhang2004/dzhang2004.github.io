@@ -1,0 +1,70 @@
+@import "//netdna.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css";
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Roboto, Helvetica, sans-serif;
+}
+.container{
+    display: flex;
+}
+#header{
+    border-bottom: 1px solid grey;
+}
+#top{
+    margin-top: 2em;
+    margin-left: 10em;
+    margin-right: 10em;
+    padding-left: 1em;
+    display: block;
+}
+#spotify-img{
+    width: 5em;
+    height: auto;
+    padding-bottom: 0.75rem;
+    /* position: relative; */
+    /* top: -5px; */
+}
+#first-login{
+    font: inherit;
+    float: right;
+    margin-top: 1em;
+    font-size: 20px;
+}
+#author{
+    font-size: 20px;
+}
+#intro{
+    padding-top: 1em;
+    background-color: white;
+}
+#paragraph {
+    padding-left: 1.5em;
+    padding-bottom: 1.5em;
+    padding-right: 1.5em;
+    padding-top: 0.5em;
+    background-color: #a9c0d4;
+    border-radius: 2em;
+}
+#login, #shuffler{
+    vertical-align: middle;
+    text-align: center;
+    padding-top: 10px;
+}
+#shuffler {
+    width: 20em;
+}
+.btn-success {
+    padding-left: 2em;
+    padding-right: 2em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    background-color: #1ED760;
+}
+#playlist-img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1em;
+}
+#sel {
+    overflow: hidden;
+    width: 15em;
+}
