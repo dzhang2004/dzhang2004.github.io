@@ -13,10 +13,10 @@ var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 
-var client_id = '840a1db9e56e4b5699ed1712e69c2e29'; // Your client id
-var client_secret = '48450bf48d1f42e784d1101fda31b471'; // Your secret
-var redirect_uri = 'https://spotifyshuffler-ca0e86429213.herokuapp.com/callback'; // Your redirect uri
-// var redirect_uri = 'http://localhost:8888/callback';
+var client_id = '840a1db9e56e4b5699ed1712e69c2e29'; // client id
+var client_secret = '48450bf48d1f42e784d1101fda31b471'; // secret
+// var redirect_uri = 'https://spotifyshuffler-ca0e86429213.herokuapp.com/callback'; // heroku redirect uri
+var redirect_uri = 'http://localhost:8888/callback'; // local redirect uri
 
 /**
  * Generates a random string containing numbers and letters
@@ -145,5 +145,4 @@ app.get('/refresh_token', function(req, res) {
 });
 
 console.log('Listening on 8888');
-// app.listen(8888);
 app.listen(process.env.PORT || 8888)
