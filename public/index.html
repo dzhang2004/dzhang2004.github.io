@@ -117,10 +117,10 @@
                         user_id = response['id'];
                         document.getElementById('playlist-cover').src =
                             response['images'][0]['url'];
-                        $('#login').hide(0);
-                        $('#first-login').hide(0);
-                        $('#playlist-img').show(0);
-                        $('#shuffler').show(0);
+                        $('#login').hide();
+                        $('#first-login').hide();
+                        $('#playlist-img').show();
+                        $('#shuffler').show();
                     }
                 });
                 let covers = {};
@@ -208,10 +208,10 @@
                 });
           } else {
               // render initial screen
-              $('#login').show(0);
-              $('#first-login').show(0);
-              $('#playlist-img').hide(0);
-              $('#shuffler').hide(0);
+              $('#login').show();
+              $('#first-login').show();
+              $('#playlist-img').hide();
+              $('#shuffler').hide();
           }
         }
       })();
