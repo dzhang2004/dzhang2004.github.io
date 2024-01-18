@@ -102,7 +102,6 @@
             error = params.error;
 
         var user_id = "";
-
         if (error) {
             alert('There was an error during the authentication');
         } else {
@@ -114,13 +113,13 @@
                     },
                     dataType: 'json',
                     success: function(response) {
-                        user_id = response['id'];
-                        document.getElementById('playlist-cover').src =
-                            response['images'][0]['url'];
                         $('#login').hide();
                         $('#first-login').hide();
                         $('#playlist-img').show();
                         $('#shuffler').show();
+                        user_id = response['id'];
+                        document.getElementById('playlist-cover').src =
+                            response['images'][0]['url'];
                     }
                 });
                 let covers = {};
